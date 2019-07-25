@@ -21,7 +21,7 @@ spec:
               value: kube
             - name: DEVPORTAL_MASTER
               value: 'true'
-          image: dockerhub.skplanet.com/palab/devx-backend:20190718075321
+          image: dockerhub.skplanet.com/palab/devx-backend
           imagePullPolicy: Always
           name: devx
           ports:
