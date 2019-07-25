@@ -1,43 +1,12 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Service
 metadata:
-  labels:
-    app: devx-backend
-  name: devx-backend
+  name: devx-backend-svc
   namespace: devx
 spec:
-  replicas: 1
+  externalIPs:
+    - 172.21.104.102
+  ports:
+    - port: 9080
   selector:
-    matchLabels:
-      app: devx-backend
-  template:
-    metadata:
-      labels:
-        app: devx-backend
-    spec:
-      containers:
-        - env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: kube
-            - name: DEVPORTAL_MASTER
-              value: 'true'
-          image: dockerhub.skplanet.com/palab/devx-backend
-          imagePullPolicy: Always
-          name: devx
-          ports:
-            - containerPort: 9080
-          volumeMounts:
-            - mountPath: /var/log
-              name: log
-        - image: dockerhub.skplanet.com/palab/filebeat
-          imagePullPolicy: Always
-          name: logging-agent
-          volumeMounts:
-            - mountPath: /var/log
-              name: log
-      imagePullSecrets:
-        - name: skp-regkey
-      nodeSelector:
-        app: backend
-      volumes:
-        - name: log
+    app: devx-backend
