@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: devx-backend
+  name: devx-backend
+  namespace: devx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devx-backend
+  template:
+    metadata:
+      labels:
+        app: devx-backend
+    spec:
+      containers:
+        - env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: kube
+            - name: DEVPORTAL_MASTER
+              value: 'true'
+          image: dockerhub.skplanet.com/palab/devx-backend:20190718075321
+          imagePullPolicy: Always
+          name: devx
+          ports:
+            - containerPort: 9080
+          volumeMounts:
+            - mountPath: /var/log
+              name: log
+        - image: dockerhub.skplanet.com/palab/filebeat
+          imagePullPolicy: Always
+          name: logging-agent
+          volumeMounts:
+            - mountPath: /var/log
+              name: log
+      imagePullSecrets:
+        - name: skp-regkey
+      nodeSelector:
+        app: backend
+      volumes:
+        - name: log
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: devx-backend-svc
+  namespace: devx
+spec:
+  externalIPs:
+    - 172.21.104.102
+  ports:
+    - port: 9080
+  selector:
+    app: devx-backend
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  name: devx-ingress
+  namespace: devx
+spec:
+  rules:
+    - host: devx.backend.com
+      http:
+        paths:
+          - backend:
+              serviceName: devx-backend-svc
+              servicePort: 9080
+
